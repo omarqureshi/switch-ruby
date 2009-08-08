@@ -52,7 +52,11 @@ case $ruby_target in
 esac
 
 if [ $cur_ver == "1.9" ]; then
-  echo "Reverting back to Ruby 1.8.6"
+  echo "Reverting back to Ruby 1.8"
+  if [ ! -e /usr/bin/rake.old ]; then
+    echo "You are missing rake.old, cannot revert to 1.8"
+    exit 1
+  fi
   rm /usr/bin/erb
   rm /usr/bin/gem
   rm /usr/bin/irb
