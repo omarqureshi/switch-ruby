@@ -9,7 +9,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-if [ ! $OSTYPE == "darwin9.0" ]; then
+if [[ !$OSTYPE = "darwin9.0" ||  !$OSTYPE = "darwin10.0" ]]; then
   echo "This script assumes that you will be running OS X"
   exit 1
 fi
@@ -25,8 +25,8 @@ if [ ! $osver == "10" ]; then
   exit 1
 fi
 
-if [ ! $majorver == "5" ]; then
-  echo "This script assumes that you will be running Leopard"
+if [[ !$majorver == "5"  || !$majorver == "6" ]] ; then
+  echo "This script assumes that you will be running Leopard or Snow Leopard"
   exit 1
 fi
 
@@ -36,7 +36,26 @@ if [ ! -e /usr/local/bin/ruby19 ]; then
   exit 1
 fi
 
-ruby_target=`readlink -f /usr/bin/ruby`
+
+TARGET_FILE="/usr/bin/ruby"
+
+cd `dirname $TARGET_FILE`
+TARGET_FILE=`basename $TARGET_FILE`
+
+# Iterate down a (possible) chain of symlinks
+while [ -L "$TARGET_FILE" ]
+do
+    TARGET_FILE=`readlink $TARGET_FILE`
+    cd `dirname $TARGET_FILE`
+    TARGET_FILE=`basename $TARGET_FILE`
+done
+
+# Compute the canonicalized name by finding the physical path 
+# for the directory we're in and appending the target file.
+PHYS_DIR=`pwd -P`
+RESULT=$PHYS_DIR/$TARGET_FILE
+
+ruby_target=$RESULT
 case $ruby_target in
 "/usr/local/bin/ruby19")
   echo "Running Ruby 1.9"
